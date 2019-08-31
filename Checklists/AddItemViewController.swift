@@ -10,23 +10,31 @@ import UIKit
 
 protocol AddItemViewControllerDelegate: class {
     
-    func addItemViewControllerDidCancel(_ controller: AddItemViewController)
+    func addItemViewControllerDidCancel(_ controller: ItemDetailViewController)
     
-    func addItemViewController(_ controller: AddItemViewController, didFinishAdding item: CheckListItem)
+    func addItemViewController(_ controller: ItemDetailViewController, didFinishAdding item: CheckListItem)
+    
+    func addItemViewController(_ controller: ItemDetailViewController, didFinishEditing item: CheckListItem)
 }
 
-class AddItemViewController: UITableViewController, UITextFieldDelegate {
+class ItemDetailViewController: UITableViewController, UITextFieldDelegate {
     weak var delegate: AddItemViewControllerDelegate?
     @IBOutlet weak var doneBarButton: UIBarButtonItem!
     
     @IBOutlet weak var textField: UITextField!
     
-    
+    var itemToEdit: CheckListItem?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         navigationItem.largeTitleDisplayMode = .never
+        
+        if let item = itemToEdit {
+            title = "Edit Item"
+            textField.text = item.text
+            doneBarButton.isEnabled = true
+        }
 
 
     }
@@ -46,10 +54,15 @@ class AddItemViewController: UITableViewController, UITextFieldDelegate {
     
     @IBAction func done() {
        
-        let item = CheckListItem()
-        item.text = textField.text!
-        
-        delegate?.addItemViewController(self, didFinishAdding: item)
+        if let item = itemToEdit {
+            item.text = textField.text!
+            delegate?.addItemViewController(self, didFinishEditing: item)
+        } else {
+            let item = CheckListItem()
+            item.text = textField.text!
+            
+            delegate?.addItemViewController(self, didFinishAdding: item)
+        }
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
